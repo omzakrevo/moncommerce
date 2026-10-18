@@ -1,0 +1,26 @@
+node_modules
+dist
+.env
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+build/
+.idea/
+*.iml
+
+# Journaux et fichiers de processus de compilation
+*.log
+*.pid
+build-logs/
+tmp/
+work/
+windows-*.stdout.log
+windows-*.stderr.log
+
+# Secrets de signature
+android/key.properties
+*.jks
+*.keystore

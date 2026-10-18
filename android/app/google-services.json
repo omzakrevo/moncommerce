@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "640580212537",
+    "project_id": "moncommerce-omzakrevo",
+    "storage_bucket": "moncommerce-omzakrevo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:640580212537:android:6f1d03569f1ebb4e88bae8",
+        "android_client_info": {
+          "package_name": "bf.moncommerce.moncommerce"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0WLfWE_pUjyzkYU2zy4jhVbazlN3Lku4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
