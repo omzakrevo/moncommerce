@@ -415,7 +415,14 @@ class PageHeader extends StatelessWidget {
   final String title, subtitle;
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(18, 22, 18, 12),
+    padding: EdgeInsets.fromLTRB(
+      MediaQuery.sizeOf(context).width > 1120
+          ? (MediaQuery.sizeOf(context).width - 1120) / 2 + 18
+          : 18,
+      22,
+      18,
+      12,
+    ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

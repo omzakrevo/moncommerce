@@ -11,6 +11,7 @@ class SalesPage extends StatefulWidget {
 
 class _SalesPageState extends State<SalesPage> {
   final search = TextEditingController();
+  String paymentFilter = 'Tous';
 
   @override
   void dispose() {
@@ -22,65 +23,198 @@ class _SalesPageState extends State<SalesPage> {
   Widget build(BuildContext context) {
     final query = search.text.trim().toLowerCase();
     final visibleSales = widget.sales.where((sale) {
+      if (paymentFilter != 'Tous' && sale.payment != paymentFilter) {
+        return false;
+      }
       return query.isEmpty ||
           sale.number.toLowerCase().contains(query) ||
           sale.product.toLowerCase().contains(query) ||
           sale.client.toLowerCase().contains(query);
     }).toList()..sort((a, b) => b.number.compareTo(a.number));
+    final width = MediaQuery.sizeOf(context).width;
+    final side = width > 1120 ? (width - 1120) / 2 + 18 : 18.0;
+    final total = visibleSales.fold<int>(0, (sum, sale) => sum + sale.amount);
     return Column(
       children: [
         const PageHeader('Ventes', 'Historique des opérations du jour'),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18),
+          padding: EdgeInsets.symmetric(horizontal: side),
           child: TextField(
             controller: search,
             onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.search),
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.search),
               hintText: 'Rechercher une vente',
-              suffixIcon: IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.tune),
-              ),
             ),
           ),
         ),
-        const SizedBox(height: 14),
-        Expanded(
-          child: ListView.separated(
-            padding: const EdgeInsets.fromLTRB(18, 0, 18, 90),
-            itemCount: visibleSales.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 10),
-            itemBuilder: (_, index) {
-              final sale = visibleSales[index];
-              return Card(
-                child: ListTile(
-                  onTap: () => _saleActions(context, sale),
-                  contentPadding: const EdgeInsets.all(14),
-                  leading: const CircleAvatar(
-                    backgroundColor: Color(0xFFE4EDFD),
-                    child: Icon(Icons.receipt_long_outlined, color: _green),
-                  ),
-                  title: Text(
-                    sale.number.isEmpty ? 'Vente' : sale.number,
-                    style: const TextStyle(fontWeight: FontWeight.w900),
-                  ),
-                  subtitle: Text(
-                    '${sale.product}\n${sale.client} • ${sale.payment} • ${sale.date} ${sale.time}',
-                  ),
-                  isThreeLine: true,
-                  trailing: Text(
-                    '${money(sale.amount)} F',
-                    style: const TextStyle(fontWeight: FontWeight.w900),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 40,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.symmetric(horizontal: side),
+            children: [
+              for (final label in const [
+                'Tous',
+                'Espèces',
+                'Orange Money',
+                'Moov Money',
+                'Crédit',
+              ])
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => setState(() => paymentFilter = label),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: paymentFilter == label ? _green : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: const [
+                          BoxShadow(color: Color(0x140F1F46), blurRadius: 6),
+                        ],
+                      ),
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: paymentFilter == label ? Colors.white : _dark,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              );
-            },
+            ],
           ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(side, 12, side, 8),
+          child: Row(
+            children: [
+              Text(
+                '${visibleSales.length} vente${visibleSales.length > 1 ? 's' : ''}',
+                style: const TextStyle(
+                  color: Color(0xFF6B7280),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${money(total)} FCFA',
+                style: const TextStyle(
+                  color: _dark,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: visibleSales.isEmpty
+              ? const Center(child: Text('Aucune vente'))
+              : ListView.separated(
+                  padding: EdgeInsets.fromLTRB(side, 0, side, 90),
+                  itemCount: visibleSales.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
+                  itemBuilder: (_, index) => _saleCard(visibleSales[index]),
+                ),
         ),
       ],
     );
   }
+
+  Widget _saleCard(SaleRecord sale) => Material(
+    color: Colors.white,
+    elevation: 1.5,
+    shadowColor: const Color(0x1A0F1F46),
+    borderRadius: BorderRadius.circular(14),
+    child: InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: () => _saleActions(context, sale),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE4EDFD),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.receipt_long_outlined, color: _green),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    sale.number.isEmpty ? 'Vente' : sale.number,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      color: _dark,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    sale.product,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Color(0xFF4B5563)),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${sale.client} • ${sale.date} ${sale.time}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '${money(sale.amount)} F',
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                    color: _dark,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE4EDFD),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    sale.payment,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: _green,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 
   void _saleActions(BuildContext context, SaleRecord sale) {
     showModalBottomSheet<void>(

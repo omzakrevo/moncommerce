@@ -41,7 +41,11 @@ class MorePage extends StatelessWidget {
     children: [
       const PageHeader('Gestion', 'Toutes les fonctions de votre boutique'),
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18),
+        padding: EdgeInsets.symmetric(
+          horizontal: MediaQuery.sizeOf(context).width > 1120
+              ? (MediaQuery.sizeOf(context).width - 1120) / 2 + 18
+              : 18,
+        ),
         child: Column(
           children: [
             _managementCard(
@@ -88,7 +92,7 @@ class MorePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Divider(height: 1, indent: 65),
+                  const Divider(height: 1, indent: 70),
                   _menu(
                     Icons.bar_chart_rounded,
                     'Rapports et statistiques',
@@ -111,7 +115,7 @@ class MorePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Divider(height: 1, indent: 65),
+                  const Divider(height: 1, indent: 70),
                   _menu(
                     Icons.description_outlined,
                     'Documents commerciaux',
@@ -124,7 +128,7 @@ class MorePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Divider(height: 1, indent: 65),
+                  const Divider(height: 1, indent: 70),
                   _menu(
                     Icons.local_shipping_outlined,
                     'Fournisseurs',
@@ -141,7 +145,7 @@ class MorePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Divider(height: 1, indent: 65),
+                  const Divider(height: 1, indent: 70),
                   _menu(
                     Icons.account_balance_wallet_outlined,
                     'Dettes fournisseurs',
@@ -153,7 +157,7 @@ class MorePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Divider(height: 1, indent: 65),
+                  const Divider(height: 1, indent: 70),
                   _menu(
                     Icons.store_mall_directory_outlined,
                     'Ma boutique',
@@ -165,7 +169,7 @@ class MorePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Divider(height: 1, indent: 65),
+                  const Divider(height: 1, indent: 70),
                   _menu(
                     Icons.people_alt_outlined,
                     'Utilisateurs',
@@ -180,7 +184,7 @@ class MorePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Divider(height: 1, indent: 65),
+                  const Divider(height: 1, indent: 70),
                   _menu(
                     Icons.cloud_upload_outlined,
                     'Sauvegarde cloud',
@@ -192,7 +196,7 @@ class MorePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Divider(height: 1, indent: 65),
+                  const Divider(height: 1, indent: 70),
                   _menu(
                     Icons.workspace_premium_outlined,
                     'Licence et abonnement',
@@ -204,7 +208,7 @@ class MorePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Divider(height: 1, indent: 65),
+                  const Divider(height: 1, indent: 70),
                   _menu(
                     Icons.notifications_outlined,
                     'Notifications et mises à jour',
@@ -216,7 +220,7 @@ class MorePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Divider(height: 1, indent: 65),
+                  const Divider(height: 1, indent: 70),
                   if (isSuperAdmin) ...[
                     _menu(
                       Icons.monitor_heart_outlined,
@@ -229,7 +233,7 @@ class MorePage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Divider(height: 1, indent: 65),
+                    const Divider(height: 1, indent: 70),
                     _menu(
                       Icons.campaign_outlined,
                       'Diffusion aux utilisateurs',
@@ -241,7 +245,7 @@ class MorePage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Divider(height: 1, indent: 65),
+                    const Divider(height: 1, indent: 70),
                     _menu(
                       Icons.admin_panel_settings_outlined,
                       'Administration des licences',
@@ -253,7 +257,7 @@ class MorePage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Divider(height: 1, indent: 65),
+                    const Divider(height: 1, indent: 70),
                   ],
                   ListTile(
                     leading: const Icon(
@@ -308,8 +312,17 @@ class MorePage extends StatelessWidget {
     String subtitle,
     VoidCallback onTap,
   ) => ListTile(
-    leading: Icon(icon, color: _green),
-    title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+    leading: Container(
+      width: 42,
+      height: 42,
+      decoration: BoxDecoration(
+        color: const Color(0xFFE4EDFD),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(icon, color: _green),
+    ),
+    title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
     subtitle: Text(subtitle),
     trailing: const Icon(Icons.chevron_right),
     onTap: onTap,
