@@ -12,18 +12,11 @@ class ProductsPage extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     children: [
       const PageHeader('Produits', 'Gérez vos articles et votre stock'),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.search),
-                  hintText: 'Rechercher un produit',
-                ),
-              ),
-            ),
+      Expanded(
+        child: _ProductBrowser(
+          products: products,
+          onOpen: (p) => _addProduct(context, existing: p),
+          actions: [
             const SizedBox(width: 10),
             IconButton.filledTonal(
               tooltip: 'Lire le nom avec la caméra',
@@ -132,72 +125,6 @@ class ProductsPage extends StatelessWidget {
               ],
             ),
           ],
-        ),
-      ),
-      const SizedBox(height: 14),
-      Expanded(
-        child: ListView.separated(
-          padding: const EdgeInsets.fromLTRB(18, 0, 18, 20),
-          itemCount: products.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 10),
-          itemBuilder: (_, index) {
-            final p = products[index];
-            final low = p.stock <= 6;
-            return Card(
-              child: ListTile(
-                onTap: () => _addProduct(context, existing: p),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 15,
-                  vertical: 8,
-                ),
-                leading: CircleAvatar(
-                  backgroundColor: _green.withValues(alpha: .1),
-                  backgroundImage:
-                      p.imagePath.isNotEmpty && File(p.imagePath).existsSync()
-                      ? FileImage(File(p.imagePath))
-                      : p.imageUrl.isNotEmpty
-                      ? NetworkImage(p.imageUrl)
-                      : null,
-                  child:
-                      (p.imagePath.isEmpty ||
-                              !File(p.imagePath).existsSync()) &&
-                          p.imageUrl.isEmpty
-                      ? Icon(p.icon, color: _green)
-                      : null,
-                ),
-                title: Text(
-                  p.name,
-                  style: const TextStyle(fontWeight: FontWeight.w800),
-                ),
-                subtitle: Text(
-                  p.barcode.isEmpty
-                      ? '${money(p.price)} FCFA'
-                      : '${money(p.price)} FCFA • ${p.barcode}',
-                ),
-                trailing: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '${p.stock} en stock',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        color: low ? const Color(0xFFD56A4D) : _green,
-                      ),
-                    ),
-                    if (low)
-                      const Text(
-                        'Stock faible',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Color(0xFFD56A4D),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            );
-          },
         ),
       ),
     ],
@@ -721,6 +648,253 @@ Future<String?> selectProductPhoto() async {
   );
   await destination.writeAsBytes(png.buffer.asUint8List(), flush: true);
   return destination.path;
+}
+
+class _ProductBrowser extends StatefulWidget {
+  const _ProductBrowser({
+    required this.products,
+    required this.actions,
+    required this.onOpen,
+  });
+  final List<Product> products;
+  final List<Widget> actions;
+  final ValueChanged<Product> onOpen;
+
+  @override
+  State<_ProductBrowser> createState() => _ProductBrowserState();
+}
+
+class _ProductBrowserState extends State<_ProductBrowser> {
+  final search = TextEditingController();
+  String filter = 'Tous';
+
+  @override
+  void dispose() {
+    search.dispose();
+    super.dispose();
+  }
+
+  List<Product> get _visible {
+    final query = search.text.trim().toLowerCase();
+    return widget.products.where((p) {
+      if (filter == 'Stock faible' && !(p.stock > 0 && p.stock <= 6)) {
+        return false;
+      }
+      if (filter == 'Épuisés' && p.stock > 0) return false;
+      return query.isEmpty ||
+          p.name.toLowerCase().contains(query) ||
+          p.barcode.toLowerCase().contains(query);
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final side = width > 1120 ? (width - 1120) / 2 + 18 : 18.0;
+    final visible = _visible;
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: side),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: search,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.search),
+                    hintText: 'Rechercher un produit',
+                    suffixIcon: search.text.isEmpty
+                        ? null
+                        : IconButton(
+                            tooltip: 'Effacer',
+                            onPressed: () {
+                              search.clear();
+                              setState(() {});
+                            },
+                            icon: const Icon(Icons.close),
+                          ),
+                  ),
+                ),
+              ),
+              ...widget.actions,
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: side),
+          child: Row(
+            children: [
+              for (final label in const ['Tous', 'Stock faible', 'Épuisés'])
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => setState(() => filter = label),
+                    child: Container(
+                      height: 40,
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: filter == label ? _green : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: const [
+                          BoxShadow(color: Color(0x140F1F46), blurRadius: 6),
+                        ],
+                      ),
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: filter == label ? Colors.white : _dark,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              const Spacer(),
+              Text(
+                '${visible.length} produit${visible.length > 1 ? 's' : ''}',
+                style: const TextStyle(
+                  color: Color(0xFF6B7280),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Expanded(
+          child: visible.isEmpty
+              ? const Center(child: Text('Aucun produit'))
+              : GridView.builder(
+                  padding: EdgeInsets.fromLTRB(side, 0, side, 20),
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 420,
+                    mainAxisExtent: 112,
+                    crossAxisSpacing: 14,
+                    mainAxisSpacing: 14,
+                  ),
+                  itemCount: visible.length,
+                  itemBuilder: (_, index) => _card(visible[index]),
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _image(Product p) {
+    if (p.imagePath.isNotEmpty && File(p.imagePath).existsSync()) {
+      return Image.file(File(p.imagePath), fit: BoxFit.cover);
+    }
+    if (p.imageUrl.isNotEmpty) {
+      return Image.network(
+        p.imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => _placeholder(p),
+      );
+    }
+    return _placeholder(p);
+  }
+
+  Widget _placeholder(Product p) => ColoredBox(
+    color: _green.withValues(alpha: .08),
+    child: Icon(p.icon, color: _green, size: 32),
+  );
+
+  Widget _card(Product p) {
+    final out = p.stock <= 0;
+    final low = !out && p.stock <= 6;
+    final badgeColor = out
+        ? const Color(0xFFB3261E)
+        : low
+        ? const Color(0xFFD56A4D)
+        : _green;
+    return Material(
+      color: Colors.white,
+      elevation: 1.5,
+      shadowColor: const Color(0x1A0F1F46),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => widget.onOpen(p),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 72,
+                height: 72,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: _image(p),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      p.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: _dark,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${money(p.price)} FCFA',
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w900,
+                        color: _dark,
+                      ),
+                    ),
+                    if (p.barcode.isNotEmpty)
+                      Text(
+                        p.barcode,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF9CA3AF),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: badgeColor.withValues(alpha: .12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  out ? 'Épuisé' : '${p.stock} en stock',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: badgeColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class UpdateDownloadButton extends StatefulWidget {
