@@ -1,4 +1,4 @@
-name: Android
+name: Compilation
 
 on:
   workflow_dispatch:
@@ -34,11 +34,31 @@ jobs:
             echo "keyAlias=$KEY_ALIAS"
             echo "storeFile=upload-keystore.jks"
           } > android/key.properties
-      - run: flutter build apk --release
-      - run: flutter build appbundle --release
+      - run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols
+      - run: flutter build appbundle --release --obfuscate --split-debug-info=build/symbols
       - uses: actions/upload-artifact@v4
         with:
           name: moncommerce-android
           path: |
-            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            build/app/outputs/flutter-apk/app-x86_64-release.apk
             build/app/outputs/bundle/release/app-release.aab
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter build windows --release
+      - name: Archiver
+        shell: pwsh
+        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath MonCommerce-Windows.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: moncommerce-windows
+          path: MonCommerce-Windows.zip
