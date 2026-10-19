@@ -273,9 +273,9 @@ Future<void> _logActivity(
   }
 }
 
-const _green = Color(0xFF126A4A);
-const _dark = Color(0xFF12352B);
-const _cream = Color(0xFFF5F7F3);
+const _green = Color(0xFF2F6BE8);
+const _dark = Color(0xFF0F1F46);
+const _cream = Color(0xFFEFF1F4);
 const _orange = Color(0xFFF0A33A);
 
 final _localNotifications = FlutterLocalNotificationsPlugin();
@@ -343,21 +343,66 @@ class MonCommerceApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         scaffoldBackgroundColor: _cream,
-        colorScheme: ColorScheme.fromSeed(seedColor: _green),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: _green,
+          primary: _green,
+          surface: Colors.white,
+        ),
         cardTheme: const CardThemeData(
           color: Colors.white,
-          elevation: 0,
+          elevation: 1.5,
+          shadowColor: Color(0x1A0F1F46),
+          surfaceTintColor: Colors.transparent,
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(18)),
+            borderRadius: BorderRadius.all(Radius.circular(14)),
           ),
         ),
         inputDecorationTheme: const InputDecorationTheme(
           filled: true,
           fillColor: Colors.white,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(14)),
-            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(color: Color(0xFFE5E7EB)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(color: Color(0xFFE5E7EB)),
+          ),
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            backgroundColor: _green,
+            minimumSize: const Size(48, 48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            textStyle: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+        ),
+        navigationRailTheme: NavigationRailThemeData(
+          backgroundColor: Colors.white,
+          indicatorColor: _green,
+          indicatorShape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          selectedIconTheme: const IconThemeData(color: Colors.white),
+          unselectedIconTheme: const IconThemeData(color: Color(0xFF9CA3AF)),
+          selectedLabelTextStyle: const TextStyle(
+            color: _green,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          indicatorColor: _green,
+          iconTheme: WidgetStateProperty.resolveWith(
+            (states) => IconThemeData(
+              color: states.contains(WidgetState.selected)
+                  ? Colors.white
+                  : const Color(0xFF9CA3AF),
+            ),
           ),
         ),
       ),

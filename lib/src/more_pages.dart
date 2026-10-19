@@ -644,7 +644,7 @@ class _ShopSettingsPageState extends State<ShopSettingsPage> {
         Card(
           child: ListTile(
             leading: const CircleAvatar(
-              backgroundColor: Color(0xFFE1F1EA),
+              backgroundColor: Color(0xFFE4EDFD),
               child: Icon(Icons.map_outlined, color: _green),
             ),
             title: Text(
@@ -779,7 +779,7 @@ class _BackupPageState extends State<BackupPage> {
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
             leading: const CircleAvatar(
-              backgroundColor: Color(0xFFE1F1EA),
+              backgroundColor: Color(0xFFE4EDFD),
               child: Icon(Icons.cloud_upload_outlined, color: _green),
             ),
             title: const Text(

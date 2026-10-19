@@ -219,7 +219,7 @@ class _WindowsCameraPreviewState extends State<WindowsCameraPreview> {
       height: 230,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: const Color(0xFF17231D),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(18),
       ),
       child: _error == null

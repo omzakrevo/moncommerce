@@ -955,10 +955,18 @@ class _AppShellState extends State<AppShell> {
                   padding: const EdgeInsets.only(top: 18),
                   child: Column(
                     children: [
-                      const Icon(
-                        Icons.storefront_rounded,
-                        color: _green,
-                        size: 32,
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _green,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.storefront_rounded,
+                          color: Colors.white,
+                          size: 26,
+                        ),
                       ),
                       const SizedBox(height: 14),
                       if (_page == 1)
@@ -979,7 +987,7 @@ class _AppShellState extends State<AppShell> {
                 children: [
                   if (_supabaseReady && widget.staffAccount == null)
                     Material(
-                      color: const Color(0xFFF1F5F2),
+                      color: const Color(0xFFF1F4F9),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,

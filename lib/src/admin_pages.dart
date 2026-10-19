@@ -48,7 +48,7 @@ class AnnouncementsPage extends StatelessWidget {
                         CircleAvatar(
                           backgroundColor: isUpdate
                               ? const Color(0xFFFFF3D6)
-                              : const Color(0xFFE1F1EA),
+                              : const Color(0xFFE4EDFD),
                           child: Icon(
                             isUpdate
                                 ? Icons.system_update
@@ -813,7 +813,7 @@ class _SuperAdminLicensesPageState extends State<SuperAdminLicensesPage> {
                     contentPadding: const EdgeInsets.all(14),
                     leading: CircleAvatar(
                       backgroundColor: status == 'active'
-                          ? const Color(0xFFE1F1EA)
+                          ? const Color(0xFFE4EDFD)
                           : const Color(0xFFFFF3D6),
                       child: Icon(
                         status == 'active' ? Icons.verified : Icons.key,
