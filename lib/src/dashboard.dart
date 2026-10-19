@@ -22,8 +22,10 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lowStock = products.where((p) => p.stock <= 6).length;
+    final width = MediaQuery.sizeOf(context).width;
+    final side = width > 1120 ? (width - 1120) / 2 + 18 : 18.0;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 28),
+      padding: EdgeInsets.fromLTRB(side, 18, side, 28),
       children: [
         Row(
           children: [
@@ -48,9 +50,9 @@ class DashboardPage extends StatelessWidget {
                       fontSize: 17,
                     ),
                   ),
-                  const Text(
-                    'Mardi 4 août',
-                    style: TextStyle(color: Colors.black54),
+                  Text(
+                    _todayLabel(),
+                    style: const TextStyle(color: Colors.black54),
                   ),
                 ],
               ),
@@ -84,7 +86,7 @@ class DashboardPage extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +116,12 @@ class DashboardPage extends StatelessWidget {
                     '$salesCount ventes',
                   ),
                   const SizedBox(width: 22),
-                  _miniMetric(Icons.trending_up, '+12,5 %'),
+                  _miniMetric(
+                    Icons.shopping_basket_outlined,
+                    salesCount == 0
+                        ? 'Panier moyen : -'
+                        : 'Panier moyen : ${money(revenue ~/ salesCount)} F',
+                  ),
                 ],
               ),
             ],
@@ -146,31 +153,42 @@ class DashboardPage extends StatelessWidget {
         const SectionTitle('Actions rapides'),
         const SizedBox(height: 12),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            QuickAction(
-              'Vendre',
-              Icons.add_shopping_cart_rounded,
-              _green,
-              onSale,
+            Expanded(
+              child: QuickAction(
+                'Vendre',
+                Icons.add_shopping_cart_rounded,
+                _green,
+                onSale,
+                highlighted: true,
+              ),
             ),
-            QuickAction(
-              'Produits',
-              Icons.inventory_2_outlined,
-              const Color(0xFF4776B7),
-              () => onNavigate(2),
+            const SizedBox(width: 10),
+            Expanded(
+              child: QuickAction(
+                'Produits',
+                Icons.inventory_2_outlined,
+                const Color(0xFF4776B7),
+                () => onNavigate(2),
+              ),
             ),
-            QuickAction(
-              'Dépense',
-              Icons.payments_outlined,
-              const Color(0xFFD56A4D),
-              () => onNavigate(3),
+            const SizedBox(width: 10),
+            Expanded(
+              child: QuickAction(
+                'Dépense',
+                Icons.payments_outlined,
+                const Color(0xFFD56A4D),
+                () => onNavigate(3),
+              ),
             ),
-            QuickAction(
-              'Crédits',
-              Icons.people_outline_rounded,
-              _orange,
-              () => onNavigate(3),
+            const SizedBox(width: 10),
+            Expanded(
+              child: QuickAction(
+                'Crédits',
+                Icons.people_outline_rounded,
+                _orange,
+                () => onNavigate(3),
+              ),
             ),
           ],
         ),
@@ -232,6 +250,34 @@ class DashboardPage extends StatelessWidget {
   }
 }
 
+String _todayLabel() {
+  const days = [
+    'Lundi',
+    'Mardi',
+    'Mercredi',
+    'Jeudi',
+    'Vendredi',
+    'Samedi',
+    'Dimanche',
+  ];
+  const months = [
+    'janvier',
+    'février',
+    'mars',
+    'avril',
+    'mai',
+    'juin',
+    'juillet',
+    'août',
+    'septembre',
+    'octobre',
+    'novembre',
+    'décembre',
+  ];
+  final now = DateTime.now();
+  return '${days[now.weekday - 1]} ${now.day} ${months[now.month - 1]}';
+}
+
 Widget _miniMetric(IconData icon, String text) => Row(
   children: [
     Icon(icon, size: 17, color: Colors.white70),
@@ -279,32 +325,57 @@ class MetricCard extends StatelessWidget {
 }
 
 class QuickAction extends StatelessWidget {
-  const QuickAction(this.label, this.icon, this.color, this.onTap, {super.key});
+  const QuickAction(
+    this.label,
+    this.icon,
+    this.color,
+    this.onTap, {
+    super.key,
+    this.highlighted = false,
+  });
   final String label;
   final IconData icon;
   final Color color;
   final VoidCallback onTap;
+  final bool highlighted;
   @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(16),
-    child: Column(
-      children: [
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: .12),
-            borderRadius: BorderRadius.circular(17),
-          ),
-          child: Icon(icon, color: color),
+  Widget build(BuildContext context) => Material(
+    color: highlighted ? _green : Colors.white,
+    elevation: 1.5,
+    shadowColor: const Color(0x1A0F1F46),
+    borderRadius: BorderRadius.circular(14),
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+        child: Column(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: highlighted
+                    ? Colors.white
+                    : color.withValues(alpha: .12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: highlighted ? _green : color),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: highlighted ? Colors.white : _dark,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 7),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-        ),
-      ],
+      ),
     ),
   );
 }
