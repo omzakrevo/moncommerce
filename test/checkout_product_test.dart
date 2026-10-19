@@ -35,7 +35,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Ajouter au panier'));
+      await tester.tap(find.byTooltip('Ajouter au panier'));
       await tester.enterText(
         find.widgetWithText(TextField, 'Client (facultatif)'),
         'Issa',
@@ -104,7 +104,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Ajouter au panier'));
+    await tester.tap(find.byTooltip('Ajouter au panier'));
     await tester.pump();
     await tester.tap(find.text('Valider la vente'));
     await tester.pumpAndSettle();
