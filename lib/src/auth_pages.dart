@@ -355,143 +355,241 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: SafeArea(
-      child: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 430),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(25),
-                    child: Image.asset(
-                      'assets/branding/moncommerce_logo.png',
-                      width: 112,
-                      height: 112,
-                      fit: BoxFit.cover,
+  Widget build(BuildContext context) {
+    final form = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Center(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(25),
+            child: Image.asset(
+              'assets/branding/moncommerce_logo.png',
+              width: 112,
+              height: 112,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        const SizedBox(height: 22),
+        const Text(
+          'MonCommerce',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 31,
+            fontWeight: FontWeight.w900,
+            color: _dark,
+          ),
+        ),
+        const SizedBox(height: 5),
+        const Text(
+          'Gérez. Suivez. Développez.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.black54),
+        ),
+        const SizedBox(height: 35),
+        if (widget.onLocalLogin != null) ...[
+          SegmentedButton<bool>(
+            segments: const [
+              ButtonSegment(value: false, label: Text('Propriétaire')),
+              ButtonSegment(value: true, label: Text('Utilisateur hors ligne')),
+            ],
+            selected: {_local},
+            onSelectionChanged: _busy
+                ? null
+                : (values) => setState(() {
+                    _local = values.single;
+                    _pin.clear();
+                  }),
+          ),
+          const SizedBox(height: 16),
+        ],
+        if (!_local && _registering)
+          TextField(
+            controller: _shop,
+            textCapitalization: TextCapitalization.words,
+            decoration: const InputDecoration(
+              labelText: 'Nom de la boutique',
+              prefixIcon: Icon(Icons.store_outlined),
+            ),
+          ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _email,
+          keyboardType: TextInputType.emailAddress,
+          decoration: InputDecoration(
+            labelText: _local ? 'Identifiant de connexion' : 'Adresse email',
+            prefixIcon: Icon(
+              _local ? Icons.badge_outlined : Icons.email_outlined,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _pin,
+          obscureText: _hidden,
+          decoration: InputDecoration(
+            labelText: 'Mot de passe',
+            prefixIcon: const Icon(Icons.lock_outline),
+            suffixIcon: IconButton(
+              onPressed: () => setState(() => _hidden = !_hidden),
+              icon: Icon(
+                _hidden
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        SizedBox(
+          height: 54,
+          child: FilledButton(
+            onPressed: _busy ? null : _submit,
+            child: Text(
+              _busy
+                  ? 'Connexion…'
+                  : _local
+                  ? 'Se connecter hors ligne'
+                  : _registering
+                  ? 'Créer mon compte et ma boutique'
+                  : 'Accéder à ma boutique',
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+          ),
+        ),
+        const SizedBox(height: 15),
+        if (!_local && widget.onRegister != null)
+          TextButton(
+            onPressed: _busy
+                ? null
+                : () => setState(() => _registering = !_registering),
+            child: Text(
+              _registering
+                  ? 'J’ai déjà un compte : se connecter'
+                  : 'Première utilisation : créer un compte',
+            ),
+          ),
+        Text(
+          _local
+              ? 'Compte créé dans Utilisateurs sur cet appareil. Aucun accès Internet nécessaire.'
+              : 'Votre adresse e-mail retrouve la même boutique sur vos appareils. Internet est nécessaire pour synchroniser les données.',
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 12, color: Colors.black54),
+        ),
+      ],
+    );
+    final card = Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1F0F1F46),
+            blurRadius: 24,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: form,
+    );
+    final wide = MediaQuery.sizeOf(context).width >= 900;
+    return Scaffold(
+      backgroundColor: _cream,
+      body: SafeArea(
+        child: wide
+            ? Row(
+                children: [
+                  Expanded(child: _brandPanel()),
+                  Expanded(
+                    child: Center(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(32),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 460),
+                          child: card,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 22),
-                const Text(
-                  'MonCommerce',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 31,
-                    fontWeight: FontWeight.w900,
-                    color: _dark,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  'Gérez. Suivez. Développez.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.black54),
-                ),
-                const SizedBox(height: 35),
-                if (widget.onLocalLogin != null) ...[
-                  SegmentedButton<bool>(
-                    segments: const [
-                      ButtonSegment(value: false, label: Text('Propriétaire')),
-                      ButtonSegment(
-                        value: true,
-                        label: Text('Utilisateur hors ligne'),
-                      ),
-                    ],
-                    selected: {_local},
-                    onSelectionChanged: _busy
-                        ? null
-                        : (values) => setState(() {
-                            _local = values.single;
-                            _pin.clear();
-                          }),
-                  ),
-                  const SizedBox(height: 16),
                 ],
-                if (!_local && _registering)
-                  TextField(
-                    controller: _shop,
-                    textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(
-                      labelText: 'Nom de la boutique',
-                      prefixIcon: Icon(Icons.store_outlined),
-                    ),
-                  ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _email,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: _local
-                        ? 'Identifiant de connexion'
-                        : 'Adresse email',
-                    prefixIcon: Icon(
-                      _local ? Icons.badge_outlined : Icons.email_outlined,
-                    ),
+              )
+            : Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 430),
+                    child: card,
                   ),
                 ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _pin,
-                  obscureText: _hidden,
-                  decoration: InputDecoration(
-                    labelText: 'Mot de passe',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      onPressed: () => setState(() => _hidden = !_hidden),
-                      icon: Icon(
-                        _hidden
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                      ),
-                    ),
-                  ),
+              ),
+      ),
+    );
+  }
+
+  Widget _brandPanel() => Container(
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        colors: [_dark, _green],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+    ),
+    padding: const EdgeInsets.all(56),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: const Icon(Icons.storefront_rounded, color: _green, size: 36),
+        ),
+        const SizedBox(height: 28),
+        const Text(
+          'Bienvenue sur MonCommerce',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 36,
+            fontWeight: FontWeight.w900,
+            height: 1.15,
+          ),
+        ),
+        const SizedBox(height: 12),
+        const Text(
+          'Gérez. Suivez. Développez.',
+          style: TextStyle(color: Colors.white70, fontSize: 18),
+        ),
+        const SizedBox(height: 36),
+        for (final line in const [
+          'Caisse rapide avec scanner de codes-barres',
+          'Stock, crédits, dépenses et rapports',
+          'Boutique synchronisée entre vos appareils',
+        ])
+          Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: Colors.white,
+                  size: 22,
                 ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  height: 54,
-                  child: FilledButton(
-                    onPressed: _busy ? null : _submit,
-                    child: Text(
-                      _busy
-                          ? 'Connexion…'
-                          : _local
-                          ? 'Se connecter hors ligne'
-                          : _registering
-                          ? 'Créer mon compte et ma boutique'
-                          : 'Accéder à ma boutique',
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    line,
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
                   ),
-                ),
-                const SizedBox(height: 15),
-                if (!_local && widget.onRegister != null)
-                  TextButton(
-                    onPressed: _busy
-                        ? null
-                        : () => setState(() => _registering = !_registering),
-                    child: Text(
-                      _registering
-                          ? 'J’ai déjà un compte : se connecter'
-                          : 'Première utilisation : créer un compte',
-                    ),
-                  ),
-                Text(
-                  _local
-                      ? 'Compte créé dans Utilisateurs sur cet appareil. Aucun accès Internet nécessaire.'
-                      : 'Votre adresse e-mail retrouve la même boutique sur vos appareils. Internet est nécessaire pour synchroniser les données.',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 12, color: Colors.black54),
                 ),
               ],
             ),
           ),
-        ),
-      ),
+      ],
     ),
   );
 }
